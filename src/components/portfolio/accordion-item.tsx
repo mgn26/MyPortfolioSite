@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 import {
   Children,
   cloneElement,
@@ -15,7 +15,7 @@ import {
   type ReactNode,
 } from "react";
 
-/** Panel height / chevron; keep in sync with the WAAPI call below. */
+/** Panel height / icon transition; keep in sync with the WAAPI call below. */
 export const ACCORDION_TRANSITION_MS = 500;
 
 /** Shorter open for nested wide panels (project card grids). */
@@ -25,6 +25,11 @@ const NESTED_WIDE_OPEN_MS = 360;
 const NESTED_CONTENT_READY_RATIO = 0.42;
 
 const EASE = "cubic-bezier(0.33, 1, 0.68, 1)";
+
+/** Softer, slightly longer icon morph than the panel height animation. */
+const ICON_EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
+const ICON_TRANSITION =
+  `opacity 600ms ${ICON_EASE}, transform 750ms ${ICON_EASE}` as const;
 
 function subscribeReducedMotion(onStoreChange: () => void) {
   const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -101,6 +106,9 @@ export function AccordionItem({
     getReducedMotionSnapshot,
     getReducedMotionServerSnapshot,
   );
+  const iconTransitionStyle = reducedMotion
+    ? undefined
+    : { transition: ICON_TRANSITION };
 
   const toggle = useCallback(() => {
     setOpen((prev) => {
@@ -292,11 +300,29 @@ export function AccordionItem({
         <span className="px-1 text-xs font-semibold tracking-[0.18em] text-heading">
           {label}
         </span>
-        <ChevronDown
-          className={`size-5 shrink-0 transform-gpu transition-transform duration-500 ease-out motion-reduce:transition-none ${open ? "-rotate-180" : ""}`}
-          strokeWidth={1.75}
+        <span
+          className="grid size-5 shrink-0 place-items-center"
           aria-hidden
-        />
+        >
+          <ChevronDown
+            className={`col-start-1 row-start-1 size-5 origin-center transform-gpu motion-reduce:transition-none ${
+              open
+                ? "scale-[0.96] opacity-0 -rotate-90"
+                : "scale-100 opacity-100 rotate-0"
+            }`}
+            strokeWidth={1.75}
+            style={iconTransitionStyle}
+          />
+          <X
+            className={`col-start-1 row-start-1 size-[17px] origin-center transform-gpu motion-reduce:transition-none ${
+              open
+                ? "scale-100 opacity-100 rotate-0"
+                : "scale-[0.96] opacity-0 rotate-45"
+            }`}
+            strokeWidth={1.75}
+            style={iconTransitionStyle}
+          />
+        </span>
       </button>
       <div
         ref={panelRef}

@@ -53,7 +53,7 @@ export function SiteFooter() {
             <div
               className="flex max-w-full items-center justify-center gap-1.5 sm:justify-start"
               role="group"
-              aria-label="Engineered by Humans. Written by AI."
+              aria-label="Engineered by Humans. Coded by AI."
             >
               <span
                 className="inline-flex shrink-0 items-center gap-1 text-muted"
@@ -68,7 +68,7 @@ export function SiteFooter() {
                 <FooterRobotIcon className="size-3.5 shrink-0" />
               </span>
               <p className="m-0 min-w-0 text-balance text-center text-[10px] font-medium uppercase tracking-[0.12em] text-muted sm:text-right">
-                Engineered by Humans. Written by AI.
+                Engineered by Humans. Coded by AI.
               </p>
             </div>
           </div>
