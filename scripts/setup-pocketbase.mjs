@@ -155,6 +155,8 @@ const COLLECTIONS = [
     fields: [
       { name: "name", type: "text", required: true },
       { name: "role", type: "text", required: false },
+      { name: "quote", type: "text", required: false },
+      { name: "quoteAttribution", type: "text", required: false },
       { name: "bio", type: "text", required: false },
       { name: "initials", type: "text", required: false },
       {
@@ -167,6 +169,25 @@ const COLLECTIONS = [
       },
       { name: "contactEmail", type: "email", required: false },
       { name: "contactWhatsapp", type: "text", required: false },
+    ],
+    ...PUBLIC_RULES,
+  },
+  {
+    name: "skills",
+    type: "base",
+    fields: [
+      { name: "category", type: "text", required: true },
+      { name: "name", type: "text", required: true },
+      { name: "sort", type: "number", required: false },
+    ],
+    ...PUBLIC_RULES,
+  },
+  {
+    name: "interests",
+    type: "base",
+    fields: [
+      { name: "label", type: "text", required: true },
+      { name: "sort", type: "number", required: false },
     ],
     ...PUBLIC_RULES,
   },
@@ -291,17 +312,91 @@ async function listRecords(token, collection, filter = "") {
 async function seedSiteProfile(token) {
   const existing = await listRecords(token, "site_profile");
 
-  if (existing.length > 0) {
+  if (existing.length === 0) {
+    console.log("  + create site_profile");
+    await pbFetch("/api/collections/site_profile/records", {
+      method: "POST",
+      headers: { Authorization: token },
+      body: JSON.stringify(seed.site_profile),
+    });
+    return;
+  }
+
+  const profile = existing[0];
+  const patch = {};
+  if (!profile.quote && seed.site_profile.quote) {
+    patch.quote = seed.site_profile.quote;
+  }
+  if (!profile.quoteAttribution && seed.site_profile.quoteAttribution) {
+    patch.quoteAttribution = seed.site_profile.quoteAttribution;
+  }
+
+  if (Object.keys(patch).length === 0) {
     console.log("  · site_profile already exists (left unchanged)");
     return;
   }
 
-  console.log("  + create site_profile");
-  await pbFetch("/api/collections/site_profile/records", {
-    method: "POST",
+  await pbFetch(`/api/collections/site_profile/records/${profile.id}`, {
+    method: "PATCH",
     headers: { Authorization: token },
-    body: JSON.stringify(seed.site_profile),
+    body: JSON.stringify(patch),
   });
+  console.log(
+    `  ↻ site_profile filled missing quote field(s): ${Object.keys(patch).join(", ")}`,
+  );
+}
+
+async function seedSkills(token) {
+  const existing = await listRecords(token, "skills");
+  const byKey = new Map(
+    existing.map((row) => [`${row.category}::${row.name}`, row]),
+  );
+
+  let created = 0;
+  for (const row of seed.skills) {
+    const key = `${row.category}::${row.name}`;
+    if (byKey.has(key)) continue;
+
+    await pbFetch("/api/collections/skills/records", {
+      method: "POST",
+      headers: { Authorization: token },
+      body: JSON.stringify(row),
+    });
+    created += 1;
+  }
+
+  if (created > 0) {
+    console.log(`  + added ${created} skill(s)`);
+  } else if (existing.length === 0) {
+    console.log(`  + seeded ${seed.skills.length} skills`);
+  } else {
+    console.log(`  · skills up to date (${existing.length} records)`);
+  }
+}
+
+async function seedInterests(token) {
+  const existing = await listRecords(token, "interests");
+  const byLabel = new Map(existing.map((row) => [row.label, row]));
+
+  let created = 0;
+  for (const row of seed.interests) {
+    if (byLabel.has(row.label)) continue;
+
+    await pbFetch("/api/collections/interests/records", {
+      method: "POST",
+      headers: { Authorization: token },
+      body: JSON.stringify(row),
+    });
+    created += 1;
+  }
+
+  if (created > 0) {
+    console.log(`  + added ${created} interest(s)`);
+  } else if (existing.length === 0) {
+    console.log(`  + seeded ${seed.interests.length} interests`);
+  } else {
+    console.log(`  · interests up to date (${existing.length} records)`);
+  }
 }
 
 async function seedSocials(token) {
@@ -391,6 +486,8 @@ async function main() {
 
   console.log("Seed data:");
   await seedSiteProfile(token);
+  await seedSkills(token);
+  await seedInterests(token);
   await seedSocials(token);
   await seedProjects(token);
 

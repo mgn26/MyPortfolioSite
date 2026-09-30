@@ -1,8 +1,10 @@
 import {
   site as staticSite,
   type ProjectGroupId,
+  type SiteInterest,
   type SiteProject,
   type SiteProjectGroup,
+  type SiteSkillGroup,
   type SiteSocial,
 } from "@/content/site";
 
@@ -10,8 +12,10 @@ export type {
   ProjectGroupId,
   ProjectInvolvement,
   ProjectStatus,
+  SiteInterest,
   SiteProject,
   SiteProjectGroup,
+  SiteSkillGroup,
   SiteSocial,
   SocialIconName,
 } from "@/content/site";
@@ -19,11 +23,15 @@ export type {
 export type SiteContent = {
   name: string;
   role: string;
+  quote?: string;
+  quoteAttribution?: string;
   bio: string;
   initials: string;
   profileImageUrl?: string;
   contactEmail?: string;
   contactWhatsapp?: string;
+  skillGroups: SiteSkillGroup[];
+  interests: SiteInterest[];
   socials: SiteSocial[];
   projectGroups: SiteProjectGroup[];
 };
@@ -42,6 +50,8 @@ type PbSiteProfile = {
   collectionId: string;
   name: string;
   role?: string;
+  quote?: string;
+  quoteAttribution?: string;
   bio?: string;
   initials?: string;
   profileImage?: PbFileField;
@@ -56,6 +66,17 @@ type PbSocial = {
   sort?: number;
   /** When false, the link is hidden on the site. Omitted or true = visible. */
   enabled?: boolean;
+};
+
+type PbSkill = {
+  category: string;
+  name: string;
+  sort?: number;
+};
+
+type PbInterest = {
+  label: string;
+  sort?: number;
 };
 
 type PbProject = {
@@ -105,10 +126,14 @@ function staticFallback(): SiteContent {
   return {
     name: staticSite.name,
     role: staticSite.role,
+    quote: staticSite.quote,
+    quoteAttribution: staticSite.quoteAttribution,
     bio: staticSite.bio,
     initials: staticSite.initials,
     contactEmail: "hello@example.com",
     contactWhatsapp: "",
+    skillGroups: staticSite.skillGroups,
+    interests: staticSite.interests,
     socials: staticSite.socials,
     projectGroups: staticSite.projectGroups,
   };
@@ -173,6 +198,29 @@ function buildProjectGroups(
   }));
 }
 
+function buildSkillGroups(skills: PbSkill[]): SiteSkillGroup[] {
+  const sorted = [...skills].sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
+  const groups: SiteSkillGroup[] = [];
+  const indexByCategory = new Map<string, number>();
+
+  for (const row of sorted) {
+    const category = row.category?.trim();
+    const name = row.name?.trim();
+    if (!category || !name) continue;
+
+    const existingIndex = indexByCategory.get(category);
+    if (existingIndex === undefined) {
+      indexByCategory.set(category, groups.length);
+      groups.push({ category, items: [name] });
+      continue;
+    }
+
+    groups[existingIndex].items.push(name);
+  }
+
+  return groups;
+}
+
 export async function getSiteContent(): Promise<SiteContent> {
   const serverUrl = getServerBaseUrl();
   const publicUrl = getPublicBaseUrl();
@@ -181,8 +229,10 @@ export async function getSiteContent(): Promise<SiteContent> {
   }
 
   try {
-    const [profiles, socials, projects] = await Promise.all([
+    const [profiles, skills, interests, socials, projects] = await Promise.all([
       pbGetList<PbSiteProfile>(serverUrl, "site_profile"),
+      pbGetList<PbSkill>(serverUrl, "skills", "sort"),
+      pbGetList<PbInterest>(serverUrl, "interests", "sort"),
       pbGetList<PbSocial & { id: string }>(serverUrl, "socials", "sort"),
       pbGetList<PbProject>(serverUrl, "projects", "sort"),
     ]);
@@ -196,14 +246,26 @@ export async function getSiteContent(): Promise<SiteContent> {
       return staticFallback();
     }
 
+    const skillGroups = buildSkillGroups(skills);
+    const mappedInterests = interests
+      .map((row) => ({ label: row.label?.trim() ?? "" }))
+      .filter((row) => row.label);
+
     return {
       name: profile.name,
       role: profile.role ?? staticSite.role,
+      quote: profile.quote || staticSite.quote,
+      quoteAttribution:
+        profile.quoteAttribution || staticSite.quoteAttribution,
       bio: profile.bio ?? staticSite.bio,
       initials: profile.initials ?? staticSite.initials,
       profileImageUrl: fileUrl(publicUrl, profile, profile.profileImage),
       contactEmail: profile.contactEmail || undefined,
       contactWhatsapp: profile.contactWhatsapp || undefined,
+      skillGroups:
+        skillGroups.length > 0 ? skillGroups : staticSite.skillGroups,
+      interests:
+        mappedInterests.length > 0 ? mappedInterests : staticSite.interests,
       socials: socials
         .filter((s) => s.enabled !== false)
         .map((s) => ({

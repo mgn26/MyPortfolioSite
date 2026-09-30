@@ -39,14 +39,81 @@ export type SiteProjectGroup = {
   projects: SiteProject[];
 };
 
+export type SiteSkillGroup = {
+  category: string;
+  items: string[];
+};
+
+export type SiteInterest = {
+  label: string;
+};
+
 /** Browser tab title (code only, not PocketBase). */
 export const siteDisplayTitle = "MADE BY MGN";
 
 export const site = {
   name: "Mojalefa Gideon Nkwana",
   role: "Software | Cybersecurity",
+  quote: "Simplicity is the ultimate sophistication.",
+  quoteAttribution: "Leonardo da Vinci",
   bio: "I craft calm, readable interfaces and ship thoughtful web experiences. Currently freelancing and exploring creative tooling.",
   initials: "MG",
+  skillGroups: [
+    {
+      category: "Soft Skills",
+      items: [
+        "Problem-solving",
+        "Effective Communication",
+        "Collaboration and teamwork",
+      ],
+    },
+    {
+      category: "Languages",
+      items: [
+        "C",
+        "C++",
+        "Python",
+        "JavaScript/TypeScript",
+        "SQL",
+        "Bash",
+        "HTML/CSS",
+      ],
+    },
+    {
+      category: "Application Frontend/Backend",
+      items: ["React", "Next.js", "Node.js", "Express"],
+    },
+    {
+      category: "Data stores",
+      items: ["MySQL", "PostgreSQL", "PocketBase", "Supabase", "Firebase"],
+    },
+    {
+      category: "Tools",
+      items: [
+        "Git",
+        "GitHub",
+        "Docker",
+        "Nmap",
+        "OWASP ZAP",
+        "Wireshark",
+        "Cursor",
+        "Claude",
+      ],
+    },
+    {
+      category: "Security",
+      items: [
+        "OWASP awareness",
+        "Linux hardening basics",
+        "Defensive lab practice",
+      ],
+    },
+  ] satisfies SiteSkillGroup[],
+  interests: [
+    { label: "Building small problem solving projects" },
+    { label: "Health and fitness" },
+    { label: "Algorithmic trading" },
+  ] satisfies SiteInterest[],
   socials: [
     { href: "https://twitter.com", label: "X / Twitter", icon: "twitter" },
     { href: "https://youtube.com", label: "YouTube", icon: "youtube" },

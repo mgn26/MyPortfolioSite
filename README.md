@@ -79,7 +79,9 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Collection     | Purpose |
 |----------------|---------|
-| `site_profile` | Name, role, bio, initials, profile image, contact email & WhatsApp |
+| `site_profile` | Name, role, quote, quote attribution, bio, initials, profile image, contact email & WhatsApp |
+| `skills`       | Skill rows (`category` + `name`, ordered by `sort`) grouped on the About page |
+| `interests`    | Interest labels (`sort` order) on the About page |
 | `socials`      | Social links (`sort` order, `enabled` toggle to show/hide) |
 | `projects`     | Project cards (`category`: `software-engineering` or `cybersecurity`) |
 

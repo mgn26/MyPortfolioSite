@@ -1,4 +1,5 @@
 import { ContactBlock } from "@/components/portfolio/contact-block";
+import { InProgressMark } from "@/components/portfolio/in-progress-mark";
 import { SiteFooter } from "@/components/portfolio/site-footer";
 import { AccordionItem } from "@/components/portfolio/accordion-item";
 import { AccordionStack } from "@/components/portfolio/accordion-stack";
@@ -44,6 +45,7 @@ export default async function Home() {
       </main>
 
       <SiteFooter />
+      <InProgressMark />
     </div>
   );
 }
