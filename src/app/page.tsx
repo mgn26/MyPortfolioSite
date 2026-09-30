@@ -16,6 +16,7 @@ export default async function Home() {
 
   return (
     <div className="relative flex min-h-dvh flex-1 flex-col bg-page">
+      <InProgressMark />
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col overflow-x-visible px-4 pb-8 pt-2 sm:px-6 sm:pb-10 sm:pt-4">
         <TopHeader site={site} />
         <div className="mt-6 border-t border-border-subtle" />
@@ -45,7 +46,6 @@ export default async function Home() {
       </main>
 
       <SiteFooter />
-      <InProgressMark />
     </div>
   );
 }

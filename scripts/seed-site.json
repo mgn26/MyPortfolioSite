@@ -42,7 +42,7 @@
     { "category": "Security", "name": "Defensive lab practice", "sort": 52 }
   ],
   "interests": [
-    { "label": "Building small problem solving projects", "sort": 1 },
+    { "label": "Building problem solving projects", "sort": 1 },
     { "label": "Health and fitness", "sort": 2 },
     { "label": "Algorithmic trading", "sort": 3 }
   ],

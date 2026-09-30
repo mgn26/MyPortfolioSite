@@ -110,7 +110,7 @@ export const site = {
     },
   ] satisfies SiteSkillGroup[],
   interests: [
-    { label: "Building small problem solving projects" },
+    { label: "Building problem solving projects" },
     { label: "Health and fitness" },
     { label: "Algorithmic trading" },
   ] satisfies SiteInterest[],
